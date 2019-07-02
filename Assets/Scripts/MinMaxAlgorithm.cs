@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "AI/TicTacToe", fileName = "TicTacToeAI")]
-public class TicTacAI : ScriptableObject
+[CreateAssetMenu(menuName = "AI/MinMax Algorithm", fileName = "MinMaxAlgorithm")]
+public class MinMaxAlgorithm : ScriptableObject
 {
     public struct Move
     {

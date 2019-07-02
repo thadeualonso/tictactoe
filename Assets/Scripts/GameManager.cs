@@ -5,15 +5,15 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using static TicTacAI;
+using static MinMaxAlgorithm;
 
-public class TicTacToeManager : MonoBehaviour
+public class GameManager : MonoBehaviour
 {
     public const string RESULT_PLAYER  = "Player wins!";
     public const string RESULT_AI      = "AI wins!";
     public const string RESULT_DRAW    = "Draw!";
 
-    [SerializeField] TicTacAI ai;
+    [SerializeField] MinMaxAlgorithm algorithm;
     [SerializeField] List<Button> buttons;
     [SerializeField] GameObject pnlFinish;
 
@@ -21,6 +21,17 @@ public class TicTacToeManager : MonoBehaviour
     private Button[,] buttonArray;
     private bool isGameFinished;
     private bool drawLastRound;
+    private bool isSingleplayer;
+
+    public void StartSingleplayer()
+    {
+        isSingleplayer = true;
+    }
+
+    public void StartMultiplayer()
+    {
+        isSingleplayer = false;
+    }
 
     public void StartGame()
     {
@@ -83,30 +94,31 @@ public class TicTacToeManager : MonoBehaviour
         int x = int.Parse(boardIndex.ToCharArray()[0].ToString());
         int y = int.Parse(boardIndex.ToCharArray()[1].ToString());
 
-        board[x, y] = ai.PlayerLetter;
-        buttonArray[x, y].GetComponentInChildren<Text>().text = ai.PlayerLetter.ToString();
+        board[x, y] = algorithm.PlayerLetter;
+        buttonArray[x, y].GetComponentInChildren<Text>().text = algorithm.PlayerLetter.ToString();
 
-        AIMove();
+        if(isSingleplayer)
+            AIMove();
 
-        if (RowCrossed() == ai.PlayerLetter)
+        if (RowCrossed() == algorithm.PlayerLetter)
             GameFinished(RESULT_PLAYER);
-        else if (RowCrossed() == ai.AiLetter)
+        else if (RowCrossed() == algorithm.AiLetter)
             GameFinished(RESULT_AI);
 
-        if (ColumnCrossed() == ai.PlayerLetter)
+        if (ColumnCrossed() == algorithm.PlayerLetter)
             GameFinished(RESULT_PLAYER);
-        else if (ColumnCrossed() == ai.AiLetter)
+        else if (ColumnCrossed() == algorithm.AiLetter)
             GameFinished(RESULT_AI);
 
-        if (DiagonalCrossed() == ai.PlayerLetter)
+        if (DiagonalCrossed() == algorithm.PlayerLetter)
             GameFinished(RESULT_PLAYER);
-        else if (DiagonalCrossed() == ai.AiLetter)
+        else if (DiagonalCrossed() == algorithm.AiLetter)
             GameFinished(RESULT_AI);
     }
 
     private void AIMove()
     {
-        Move bestMove = ai.FindBestMove(board, 1);
+        Move bestMove = algorithm.FindBestMove(board, 1);
 
         if (bestMove.x == -1)
         {
@@ -114,9 +126,9 @@ public class TicTacToeManager : MonoBehaviour
             return;
         }
 
-        board[bestMove.x, bestMove.y] = ai.AiLetter;
+        board[bestMove.x, bestMove.y] = algorithm.AiLetter;
         Text buttonText = buttonArray[bestMove.x, bestMove.y].GetComponentInChildren<Text>();
-        buttonText.text = ai.AiLetter.ToString();
+        buttonText.text = algorithm.AiLetter.ToString();
         buttonArray[bestMove.x, bestMove.y].interactable = false;
     }
 
