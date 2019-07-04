@@ -6,18 +6,6 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "AI/MinMax Algorithm", fileName = "MinMaxAlgorithm")]
 public class MinMaxAlgorithm : ScriptableObject
 {
-    public struct Move
-    {
-        public int x;
-        public int y;
-
-        public Move(int x, int y)
-        {
-            this.x = x;
-            this.y = y;
-        }
-    }
-
     public const int MAX_SCORE  = 10;
     public const int MIN_SCORE  = -10;
     public const int TIE_SCORE  = 0;

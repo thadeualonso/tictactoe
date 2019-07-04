@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
-using static MinMaxAlgorithm;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,17 +8,21 @@ public class GameManager : MonoBehaviour
     public const string RESULT_AI = "AI wins!";
     public const string RESULT_DRAW = "Draw!";
 
+    [Header("Components")]
     [SerializeField] MinMaxAlgorithm algorithm;
+    [SerializeField] Board board;
+
+    [Header("Settings")]
     [SerializeField] List<GameMode> gameModes;
-    [SerializeField] List<Button> buttons;
+
     [Header("Events")]
     [SerializeField] UnityEventString onGameFinished;
 
-    private char[,] board;
-    private Button[,] buttonArray;
     private bool isGameFinished;
     private bool drawLastRound;
     private bool isSingleplayer;
+    private Player human;
+    private Player ai;
 
     public void StartSingleplayer()
     {
@@ -39,53 +39,16 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         isGameFinished = false;
-        SetupBoard();
-        SetupButtonArray();
+        board.Setup();
+
+        human = new Player(algorithm.PlayerLetter, false);
+        ai = new Player(algorithm.AiLetter, true);
 
         if (drawLastRound)
         {
-            AIMove();
+            Move aiMove = new Move(Random.Range(0, 3), Random.Range(0, 3));
+            board.MakeMove(ai, aiMove);
             drawLastRound = false;
-        }
-    }
-
-    private void SetupBoard()
-    {
-        board = new char[3, 3];
-
-        for (int row = 0; row < 3; row++)
-        {
-            for (int col = 0; col < 3; col++)
-            {
-                board[row, col] = '_';
-            }
-        }
-    }
-
-    private void SetupButtonArray()
-    {
-        buttonArray = new Button[3, 3];
-
-        buttonArray[0, 0] = buttons[0];
-        buttonArray[0, 1] = buttons[1];
-        buttonArray[0, 2] = buttons[2];
-        buttonArray[1, 0] = buttons[3];
-        buttonArray[1, 1] = buttons[4];
-        buttonArray[1, 2] = buttons[5];
-        buttonArray[2, 0] = buttons[6];
-        buttonArray[2, 1] = buttons[7];
-        buttonArray[2, 2] = buttons[8];
-
-        ClearBoard();
-    }
-
-    private void ClearBoard()
-    {
-        foreach (Button button in buttonArray)
-        {
-            button.interactable = true;
-            Text buttonText = button.GetComponentInChildren<Text>();
-            buttonText.text = "";
         }
     }
 
@@ -97,50 +60,55 @@ public class GameManager : MonoBehaviour
         int x = int.Parse(boardIndex.ToCharArray()[0].ToString());
         int y = int.Parse(boardIndex.ToCharArray()[1].ToString());
 
-        board[x, y] = algorithm.PlayerLetter;
-        buttonArray[x, y].GetComponentInChildren<Text>().text = algorithm.PlayerLetter.ToString();
-        buttonArray[x, y].interactable = false;
+        Move move = new Move(x, y);
 
-        if (isSingleplayer)
+        bool gameFinished = board.MakeMove(human, move);
+
+        if(gameFinished)
         {
-            bool draw = AIMove();
-
-            if (draw)
+            CheckGameResult(board.WinnerLetter);
+            return;
+        }
+        else
+        {
+            if (isSingleplayer)
             {
-                GameFinished(RESULT_DRAW);
-                return;
+                Move aiMove = algorithm.FindBestMove(board.BoardMatrix, 1);
+
+                if (aiMove.X == -1)
+                {
+                    GameFinished(RESULT_DRAW);
+                    return;
+                }
+
+                bool gameFinish = board.MakeMove(ai, aiMove);
+
+                if (gameFinish)
+                {
+                    CheckGameResult(board.WinnerLetter);
+                    return;
+                }
             }
         }
-
-        if (RowCrossed() == algorithm.PlayerLetter)
-            GameFinished(RESULT_PLAYER);
-        else if (RowCrossed() == algorithm.AiLetter)
-            GameFinished(RESULT_AI);
-
-        if (ColumnCrossed() == algorithm.PlayerLetter)
-            GameFinished(RESULT_PLAYER);
-        else if (ColumnCrossed() == algorithm.AiLetter)
-            GameFinished(RESULT_AI);
-
-        if (DiagonalCrossed() == algorithm.PlayerLetter)
-            GameFinished(RESULT_PLAYER);
-        else if (DiagonalCrossed() == algorithm.AiLetter)
-            GameFinished(RESULT_AI);
     }
 
-    private bool AIMove()
+    private void CheckGameResult(char winner)
     {
-        Move bestMove = algorithm.FindBestMove(board, 1);
-
-        if (bestMove.x == -1)
-            return true;
-
-        board[bestMove.x, bestMove.y] = algorithm.AiLetter;
-        Text buttonText = buttonArray[bestMove.x, bestMove.y].GetComponentInChildren<Text>();
-        buttonText.text = algorithm.AiLetter.ToString();
-        buttonArray[bestMove.x, bestMove.y].interactable = false;
-
-        return false;
+        if (winner == algorithm.PlayerLetter)
+        {
+            GameFinished(RESULT_PLAYER);
+            return;
+        }
+        else if (winner == algorithm.AiLetter)
+        {
+            GameFinished(RESULT_AI);
+            return;
+        }
+        else
+        {
+            GameFinished(RESULT_DRAW);
+            return;
+        }
     }
 
     private void GameFinished(string result)
@@ -150,45 +118,6 @@ public class GameManager : MonoBehaviour
 
         onGameFinished?.Invoke(result);
         isGameFinished = true;
-    }
-
-    private char RowCrossed()
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            if (board[i, 0] == '_')
-                continue;
-
-            if (board[i, 0] == board[i, 1] && board[i, 1] == board[i, 2])
-                return board[i, 0];
-        }
-
-        return '_';
-    }
-
-    private char ColumnCrossed()
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            if (board[0, i] == '_')
-                continue;
-
-            if (board[0, i] == board[1, i] && board[1, i] == board[2, i])
-                return board[0, i];
-        }
-
-        return '_';
-    }
-
-    private char DiagonalCrossed()
-    {
-        if (board[0, 0] == board[1, 1] && board[1, 1] == board[2, 2] && board[1, 1] != '_')
-            return board[0, 0];
-
-        if (board[2, 0] == board[1, 1] && board[1, 1] == board[0, 2] && board[1, 1] != '_')
-            return board[2, 0];
-
-        return '_';
     }
 
     private void Update()
