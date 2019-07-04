@@ -24,6 +24,12 @@ public class GameManager : MonoBehaviour
     private Player human;
     private Player ai;
 
+    private void Awake()
+    {
+        if (board == null)
+            board = FindObjectOfType<Board>();
+    }
+
     public void StartSingleplayer()
     {
         isSingleplayer = true;
@@ -62,33 +68,26 @@ public class GameManager : MonoBehaviour
 
         Move move = new Move(x, y);
 
-        bool gameFinished = board.MakeMove(human, move);
+        board.MakeMove(human, move);
 
-        if(gameFinished)
+        if (board.HasLineCrossed() || board.IsFull())
         {
             CheckGameResult(board.WinnerLetter);
+        }
+
+        Move aiMove = algorithm.FindBestMove(board.BoardMatrix, 1);
+
+        if (aiMove.X == -1)
+        {
+            GameFinished(RESULT_DRAW);
             return;
         }
-        else
+
+        board.MakeMove(ai, aiMove);
+
+        if(board.HasLineCrossed() || board.IsFull())
         {
-            if (isSingleplayer)
-            {
-                Move aiMove = algorithm.FindBestMove(board.BoardMatrix, 1);
-
-                if (aiMove.X == -1)
-                {
-                    GameFinished(RESULT_DRAW);
-                    return;
-                }
-
-                bool gameFinish = board.MakeMove(ai, aiMove);
-
-                if (gameFinish)
-                {
-                    CheckGameResult(board.WinnerLetter);
-                    return;
-                }
-            }
+            CheckGameResult(board.WinnerLetter);
         }
     }
 
@@ -115,7 +114,7 @@ public class GameManager : MonoBehaviour
     {
         if (result == RESULT_DRAW)
             drawLastRound = true;
-
+        
         onGameFinished?.Invoke(result);
         isGameFinished = true;
     }

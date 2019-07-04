@@ -30,13 +30,11 @@ public class Board : MonoBehaviour
         ClearBoard();
     }
 
-    public bool MakeMove(Player player, Move move)
+    public void MakeMove(Player player, Move move)
     {
         BoardMatrix[move.X, move.Y] = player.Letter;
         buttonArray[move.X, move.Y].GetComponentInChildren<Text>().text = player.Letter.ToString();
         buttonArray[move.X, move.Y].interactable = false;
-
-        return HasLineCrossed() || IsFull();
     }
 
     public bool HasLineCrossed()
@@ -111,6 +109,11 @@ public class Board : MonoBehaviour
         }
 
         return false;
+    }
+
+    public void ClearWinner()
+    {
+        WinnerLetter = '\0';
     }
 
     private bool IsColumnCrossed()

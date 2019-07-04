@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Multiplayer
   m_EditorClassIdentifier: 
   players:
-  - isAI: 0
-    letter: 88
-  - isAI: 0
-    letter: 79
+  - letter: 88
+    isAI: 0
+  - letter: 79
+    isAI: 0
