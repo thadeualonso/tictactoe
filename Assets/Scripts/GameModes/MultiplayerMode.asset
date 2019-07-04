@@ -9,11 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ee4129eb78466aa499d2908fbad3c6a9, type: 3}
-  m_Name: Multiplayer
+  m_Script: {fileID: 11500000, guid: 0109f65c9a1b23f42a882e3e749eda54, type: 3}
+  m_Name: MultiplayerMode
   m_EditorClassIdentifier: 
-  players:
-  - letter: 88
+  player1:
+    playerName: Player 1
+    letter: 88
     isAI: 0
-  - letter: 79
+  player2:
+    playerName: Player 2
+    letter: 79
     isAI: 0

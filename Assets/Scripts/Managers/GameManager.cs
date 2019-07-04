@@ -18,11 +18,8 @@ public class GameManager : MonoBehaviour
     [Header("Events")]
     [SerializeField] UnityEventString onGameFinished;
 
+    private GameMode currentGameMode;
     private bool isGameFinished;
-    private bool drawLastRound;
-    private bool isSingleplayer;
-    private Player human;
-    private Player ai;
 
     private void Awake()
     {
@@ -32,13 +29,13 @@ public class GameManager : MonoBehaviour
 
     public void StartSingleplayer()
     {
-        isSingleplayer = true;
+        currentGameMode = gameModes.Find(gm => gm.GetType() == typeof(SingleplayerMode));
         StartGame();
     }
 
     public void StartMultiplayer()
     {
-        isSingleplayer = false;
+        currentGameMode = gameModes.Find(gm => gm.GetType() == typeof(MultiplayerMode));
         StartGame();
     }
 
@@ -46,16 +43,7 @@ public class GameManager : MonoBehaviour
     {
         isGameFinished = false;
         board.Setup();
-
-        human = new Player(algorithm.PlayerLetter, false);
-        ai = new Player(algorithm.AiLetter, true);
-
-        if (drawLastRound)
-        {
-            Move aiMove = new Move(Random.Range(0, 3), Random.Range(0, 3));
-            board.MakeMove(ai, aiMove);
-            drawLastRound = false;
-        }
+        currentGameMode.Setup(board, algorithm);
     }
 
     public void MakeMove(string boardIndex)
@@ -67,54 +55,23 @@ public class GameManager : MonoBehaviour
         int y = int.Parse(boardIndex.ToCharArray()[1].ToString());
 
         Move move = new Move(x, y);
+        bool turnFinishesGame = currentGameMode.RunTurn(move);
 
-        board.MakeMove(human, move);
+        if (turnFinishesGame)
+            CheckGameResult();
 
-        if (board.HasLineCrossed() || board.IsFull())
-        {
-            CheckGameResult(board.WinnerLetter);
-        }
-
-        Move aiMove = algorithm.FindBestMove(board.BoardMatrix, 1);
-
-        if (aiMove.X == -1)
-        {
-            GameFinished(RESULT_DRAW);
-            return;
-        }
-
-        board.MakeMove(ai, aiMove);
-
-        if(board.HasLineCrossed() || board.IsFull())
-        {
-            CheckGameResult(board.WinnerLetter);
-        }
+        //if (board.HasLineCrossed() || board.IsFull())
+        //    CheckGameResult();
     }
 
-    private void CheckGameResult(char winner)
+    private void CheckGameResult()
     {
-        if (winner == algorithm.PlayerLetter)
-        {
-            GameFinished(RESULT_PLAYER);
-            return;
-        }
-        else if (winner == algorithm.AiLetter)
-        {
-            GameFinished(RESULT_AI);
-            return;
-        }
-        else
-        {
-            GameFinished(RESULT_DRAW);
-            return;
-        }
+        string gameResult = currentGameMode.GetGameResult(board.WinnerLetter);
+        GameFinished(gameResult);
     }
 
     private void GameFinished(string result)
-    {
-        if (result == RESULT_DRAW)
-            drawLastRound = true;
-        
+    {     
         onGameFinished?.Invoke(result);
         isGameFinished = true;
     }
