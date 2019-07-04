@@ -1,21 +1,22 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using static MinMaxAlgorithm;
 
 public class GameManager : MonoBehaviour
 {
-    public const string RESULT_PLAYER  = "Player wins!";
-    public const string RESULT_AI      = "AI wins!";
-    public const string RESULT_DRAW    = "Draw!";
+    public const string RESULT_PLAYER = "Player wins!";
+    public const string RESULT_AI = "AI wins!";
+    public const string RESULT_DRAW = "Draw!";
 
     [SerializeField] MinMaxAlgorithm algorithm;
+    [SerializeField] List<GameMode> gameModes;
     [SerializeField] List<Button> buttons;
-    [SerializeField] GameObject pnlFinish;
+    [Header("Events")]
+    [SerializeField] UnityEventString onGameFinished;
 
     private char[,] board;
     private Button[,] buttonArray;
@@ -26,11 +27,13 @@ public class GameManager : MonoBehaviour
     public void StartSingleplayer()
     {
         isSingleplayer = true;
+        StartGame();
     }
 
     public void StartMultiplayer()
     {
         isSingleplayer = false;
+        StartGame();
     }
 
     public void StartGame()
@@ -39,7 +42,7 @@ public class GameManager : MonoBehaviour
         SetupBoard();
         SetupButtonArray();
 
-        if(drawLastRound)
+        if (drawLastRound)
         {
             AIMove();
             drawLastRound = false;
@@ -81,8 +84,8 @@ public class GameManager : MonoBehaviour
         foreach (Button button in buttonArray)
         {
             button.interactable = true;
-            Text buttonText     = button.GetComponentInChildren<Text>();
-            buttonText.text     = "";
+            Text buttonText = button.GetComponentInChildren<Text>();
+            buttonText.text = "";
         }
     }
 
@@ -96,9 +99,18 @@ public class GameManager : MonoBehaviour
 
         board[x, y] = algorithm.PlayerLetter;
         buttonArray[x, y].GetComponentInChildren<Text>().text = algorithm.PlayerLetter.ToString();
+        buttonArray[x, y].interactable = false;
 
-        if(isSingleplayer)
-            AIMove();
+        if (isSingleplayer)
+        {
+            bool draw = AIMove();
+
+            if (draw)
+            {
+                GameFinished(RESULT_DRAW);
+                return;
+            }
+        }
 
         if (RowCrossed() == algorithm.PlayerLetter)
             GameFinished(RESULT_PLAYER);
@@ -116,20 +128,19 @@ public class GameManager : MonoBehaviour
             GameFinished(RESULT_AI);
     }
 
-    private void AIMove()
+    private bool AIMove()
     {
         Move bestMove = algorithm.FindBestMove(board, 1);
 
         if (bestMove.x == -1)
-        {
-            GameFinished(RESULT_DRAW);
-            return;
-        }
+            return true;
 
         board[bestMove.x, bestMove.y] = algorithm.AiLetter;
         Text buttonText = buttonArray[bestMove.x, bestMove.y].GetComponentInChildren<Text>();
         buttonText.text = algorithm.AiLetter.ToString();
         buttonArray[bestMove.x, bestMove.y].interactable = false;
+
+        return false;
     }
 
     private void GameFinished(string result)
@@ -137,9 +148,7 @@ public class GameManager : MonoBehaviour
         if (result == RESULT_DRAW)
             drawLastRound = true;
 
-        pnlFinish.GetComponent<CanvasGroup>().alpha = 1f;
-        pnlFinish.GetComponent<CanvasGroup>().blocksRaycasts = true;
-        pnlFinish.GetComponentInChildren<TextMeshProUGUI>().text = result;
+        onGameFinished?.Invoke(result);
         isGameFinished = true;
     }
 
@@ -151,7 +160,7 @@ public class GameManager : MonoBehaviour
                 continue;
 
             if (board[i, 0] == board[i, 1] && board[i, 1] == board[i, 2])
-                return board[i,0];
+                return board[i, 0];
         }
 
         return '_';
@@ -173,11 +182,11 @@ public class GameManager : MonoBehaviour
 
     private char DiagonalCrossed()
     {
-        if (board[0, 0] == board[1, 1] && board[1, 1] == board[2, 2] && board[1,1] != '_')
-            return board[0,0];
+        if (board[0, 0] == board[1, 1] && board[1, 1] == board[2, 2] && board[1, 1] != '_')
+            return board[0, 0];
 
         if (board[2, 0] == board[1, 1] && board[1, 1] == board[0, 2] && board[1, 1] != '_')
-            return board[2,0];
+            return board[2, 0];
 
         return '_';
     }

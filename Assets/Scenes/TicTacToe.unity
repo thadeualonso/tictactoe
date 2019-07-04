@@ -537,6 +537,7 @@ GameObject:
   - component: {fileID: 207617834}
   - component: {fileID: 207617833}
   - component: {fileID: 207617832}
+  - component: {fileID: 207617836}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -620,13 +621,55 @@ RectTransform:
   - {fileID: 387965544}
   - {fileID: 1226145509}
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &207617836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 207617831}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 651dfc5de78a832418fc7aa150abbef3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  listeners:
+  - name: OnGameFinished
+    Event: {fileID: 11400000, guid: c79ca1dc2c46bf44e83a3f648af1c942, type: 2}
+    Response:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 387965548}
+          m_MethodName: Show
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: 1170947323}
+          m_MethodName: SetText
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+      m_TypeName: UnityEventString, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
 --- !u!1 &211259800
 GameObject:
   m_ObjectHideFlags: 0
@@ -1856,7 +1899,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &555811237
 GameObject:
@@ -1962,6 +2005,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   algorithm: {fileID: 11400000, guid: 8b8577ad5ba3e8d46887f29660df55c7, type: 2}
+  gameModes:
+  - {fileID: 11400000, guid: 993db85219a5df943bb4f471dcf2baa5, type: 2}
+  - {fileID: 11400000, guid: 27ec3b51c774ac24aa81ecd143017b1d, type: 2}
   buttons:
   - {fileID: 1735118466}
   - {fileID: 625903861}
@@ -1972,7 +2018,22 @@ MonoBehaviour:
   - {fileID: 283860629}
   - {fileID: 257252974}
   - {fileID: 829869117}
-  pnlFinish: {fileID: 387965543}
+  onGameFinished:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 11400000, guid: c79ca1dc2c46bf44e83a3f648af1c942, type: 2}
+        m_MethodName: Raise
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_TypeName: UnityEventString, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
 --- !u!4 &567970559
 Transform:
   m_ObjectHideFlags: 0
@@ -1985,7 +2046,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &576316223
 GameObject:
@@ -3321,7 +3382,7 @@ GameObject:
   - component: {fileID: 1170947324}
   - component: {fileID: 1170947323}
   m_Layer: 5
-  m_Name: Text
+  m_Name: txtResult
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
