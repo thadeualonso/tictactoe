@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -10,7 +12,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Components")]
     [SerializeField] MinMaxAlgorithm algorithm;
-    [SerializeField] Board board;
+    [SerializeField] BoardManager board;
 
     [Header("Settings")]
     [SerializeField] List<GameMode> gameModes;
@@ -24,7 +26,7 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         if (board == null)
-            board = FindObjectOfType<Board>();
+            board = FindObjectOfType<BoardManager>();
     }
 
     public void StartSingleplayer()
@@ -59,15 +61,19 @@ public class GameManager : MonoBehaviour
 
         if (turnFinishesGame)
             CheckGameResult();
-
-        //if (board.HasLineCrossed() || board.IsFull())
-        //    CheckGameResult();
     }
 
     private void CheckGameResult()
     {
         string gameResult = currentGameMode.GetGameResult(board.WinnerLetter);
-        GameFinished(gameResult);
+        StartCoroutine(RunAfterTime(() => GameFinished(gameResult), 2f));
+        //GameFinished(gameResult);
+    }
+
+    private IEnumerator RunAfterTime(Action method, float time)
+    {
+        yield return new WaitForSeconds(time);
+        method.Invoke();
     }
 
     private void GameFinished(string result)
