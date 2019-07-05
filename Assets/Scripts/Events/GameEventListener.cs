@@ -6,6 +6,7 @@ using UnityEngine.Events;
 [Serializable]
 public class Listener
 {
+    public string name;
     public GameEvent Event;
     public UnityEvent Response;
 }

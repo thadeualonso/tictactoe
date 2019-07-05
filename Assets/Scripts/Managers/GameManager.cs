@@ -2,23 +2,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    public const string RESULT_PLAYER = "Player wins!";
-    public const string RESULT_AI = "AI wins!";
-    public const string RESULT_DRAW = "Draw!";
-
     [Header("Components")]
     [SerializeField] MinMaxAlgorithm algorithm;
     [SerializeField] BoardManager board;
 
     [Header("Settings")]
     [SerializeField] List<GameMode> gameModes;
+    [SerializeField] float gameFinishDelay = 2f;
 
     [Header("Events")]
     [SerializeField] UnityEventString onGameFinished;
+    [SerializeField] UnityEvent onScore;
 
     private GameMode currentGameMode;
     private bool isGameFinished;
@@ -66,13 +65,16 @@ public class GameManager : MonoBehaviour
     private void CheckGameResult()
     {
         string gameResult = currentGameMode.GetGameResult(board.WinnerLetter);
-        StartCoroutine(RunAfterTime(() => GameFinished(gameResult), 2f));
-        //GameFinished(gameResult);
+
+        if (gameResult != "Draw!")
+            onScore.Invoke();
+
+        StartCoroutine(RunAfterTime(() => GameFinished(gameResult), gameFinishDelay));
     }
 
-    private IEnumerator RunAfterTime(Action method, float time)
+    private IEnumerator RunAfterTime(Action method, float delay)
     {
-        yield return new WaitForSeconds(time);
+        yield return new WaitForSeconds(delay);
         method.Invoke();
     }
 
@@ -80,11 +82,5 @@ public class GameManager : MonoBehaviour
     {     
         onGameFinished?.Invoke(result);
         isGameFinished = true;
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.R))
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

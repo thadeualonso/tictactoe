@@ -8,13 +8,10 @@ using UnityEngine.Events;
 [CreateAssetMenu(fileName = "NewGameEvent", menuName = "Events/Game Event")]
 public class GameEvent : ScriptableObject
 {
-    private UnityEvent onRaise;
-
     private List<IGameEventListener> listeners = new List<IGameEventListener>();
 
     public void Raise()
     {
-        onRaise.Invoke();
         InvokeListeners();
     }
 

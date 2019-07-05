@@ -16,7 +16,7 @@ public class MinMaxAlgorithm : ScriptableObject
     public char PlayerLetter { get { return PLAYER; } }
     public char AiLetter { get { return AI; } }
 
-    public Move FindBestMove(char[,] board, int height)
+    public Move FindBestMove(char[,] board)
     {
         int bestScore = -1000;
         Move bestMove = new Move(-1, -1);
@@ -28,7 +28,7 @@ public class MinMaxAlgorithm : ScriptableObject
                 if(board[x,y] == EMPTY)
                 {
                     board[x, y] = PLAYER;
-                    int score = MinMax(0, board, false, height);
+                    int score = MinMax(0, board, false);
                     board[x, y] = EMPTY;
 
                     if(score > bestScore)
@@ -43,12 +43,9 @@ public class MinMaxAlgorithm : ScriptableObject
         return bestMove;
     }
 
-    private int MinMax(int depth, char[,] board, bool isMax, int height)
+    private int MinMax(int depth, char[,] board, bool isMax)
     {
         int score = Evaluate(board);
-
-        //if (depth == height)
-          //  return score;
 
         if (score == MAX_SCORE)
             return score;
@@ -68,11 +65,8 @@ public class MinMaxAlgorithm : ScriptableObject
                 if(board[x,y] == EMPTY)
                 {
                     board[x, y] = isMax ? PLAYER : AI;
-
-                    int value = MinMax(depth + 1, board, !isMax, height);
-
+                    int value = MinMax(depth + 1, board, !isMax);
                     bestScore = isMax ? Mathf.Max(bestScore, value) : Mathf.Min(bestScore, value);
-
                     board[x, y] = EMPTY;
                 }
             }

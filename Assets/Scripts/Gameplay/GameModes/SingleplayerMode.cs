@@ -7,7 +7,8 @@ public class SingleplayerMode : GameMode
     {
         if(drawLastRound)
         {
-            AIMove();
+            Move randomMove = new Move(Random.Range(0, 3), Random.Range(0, 3));
+            AIMove(randomMove);
             drawLastRound = false;
         }
     }
@@ -18,19 +19,19 @@ public class SingleplayerMode : GameMode
 
         isGameFinished = board.MakeMove(player1, move);
 
-        if(!isGameFinished)
-            isGameFinished = AIMove();
+        Move aiMove = algorithm.FindBestMove(board.BoardMatrix);
+
+        if (!isGameFinished)
+            isGameFinished = AIMove(aiMove);
 
         return isGameFinished;
     }
 
-    private bool AIMove()
+    private bool AIMove(Move move)
     {
-        Move aiMove = algorithm.FindBestMove(board.BoardMatrix, 1);
-
-        if (aiMove.X == -1)
+        if (move.X == -1)
             return true;
 
-        return board.MakeMove(player2, aiMove);
+        return board.MakeMove(player2, move);
     }
 }

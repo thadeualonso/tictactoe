@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,11 +7,14 @@ using UnityEngine.UI;
 public class BoardManager : MonoBehaviour
 {
     [SerializeField] List<Button> buttons;
+    [SerializeField] List<AudioClip> comboSFX;
+    [SerializeField] float comboDelay;
 
     public char[,] BoardMatrix { get; set; }
     public char WinnerLetter { get; set; }
 
     private Button[,] buttonArray;
+    private List<Button> comboList = new List<Button>();
 
     public void Setup()
     {
@@ -73,6 +77,26 @@ public class BoardManager : MonoBehaviour
         return true;
     }
 
+    public void ComboEffect()
+    {
+        foreach (Button button in buttonArray)
+        {
+            button.interactable = false;
+        }
+
+        StartCoroutine(Combo());
+    }
+
+    private IEnumerator Combo()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            yield return new WaitForSeconds(comboDelay);
+            AudioSource.PlayClipAtPoint(comboSFX[i], Camera.main.transform.position);
+            comboList[i].GetComponent<Animator>().SetTrigger("Combo");
+        }
+    }
+
     private void SetupBoard()
     {
         BoardMatrix = new char[3, 3];
@@ -92,8 +116,16 @@ public class BoardManager : MonoBehaviour
         {
             button.interactable = true;
             TextMeshProUGUI buttonText = button.GetComponentInChildren<TextMeshProUGUI>();
+            Animator buttonAnimator = button.GetComponent<Animator>();
+            buttonAnimator.Rebind();
             buttonText.text = "";
         }
+    }
+
+    public void ClearWinner()
+    {
+        WinnerLetter = '\0';
+        comboList.Clear();
     }
 
     private bool IsRowCrossed()
@@ -106,16 +138,14 @@ public class BoardManager : MonoBehaviour
             if (BoardMatrix[i, 0] == BoardMatrix[i, 1] && BoardMatrix[i, 1] == BoardMatrix[i, 2])
             {
                 WinnerLetter = BoardMatrix[i, 0];
+                comboList.Add(buttonArray[i, 0]);
+                comboList.Add(buttonArray[i, 1]);
+                comboList.Add(buttonArray[i, 2]);
                 return true;
             }
         }
 
         return false;
-    }
-
-    public void ClearWinner()
-    {
-        WinnerLetter = '\0';
     }
 
     private bool IsColumnCrossed()
@@ -128,6 +158,9 @@ public class BoardManager : MonoBehaviour
             if (BoardMatrix[0, i] == BoardMatrix[1, i] && BoardMatrix[1, i] == BoardMatrix[2, i])
             {
                 WinnerLetter = BoardMatrix[0, i];
+                comboList.Add(buttonArray[0, i]);
+                comboList.Add(buttonArray[1, i]);
+                comboList.Add(buttonArray[2, i]);
                 return true;
             }
         }
@@ -140,12 +173,18 @@ public class BoardManager : MonoBehaviour
         if (BoardMatrix[0, 0] == BoardMatrix[1, 1] && BoardMatrix[1, 1] == BoardMatrix[2, 2] && BoardMatrix[1, 1] != '_')
         {
             WinnerLetter = BoardMatrix[0, 0];
+            comboList.Add(buttonArray[0, 0]);
+            comboList.Add(buttonArray[1, 1]);
+            comboList.Add(buttonArray[2, 2]);
             return true;
         }
 
         if (BoardMatrix[2, 0] == BoardMatrix[1, 1] && BoardMatrix[1, 1] == BoardMatrix[0, 2] && BoardMatrix[1, 1] != '_')
         {
             WinnerLetter = BoardMatrix[2, 0];
+            comboList.Add(buttonArray[2, 0]);
+            comboList.Add(buttonArray[1, 1]);
+            comboList.Add(buttonArray[0, 2]);
             return true;
         }
 
